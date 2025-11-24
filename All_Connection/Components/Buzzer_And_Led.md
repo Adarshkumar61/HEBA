@@ -6,11 +6,13 @@ Buzzer (–) → GND
 
 LEDs:
 
-LED color	ESP32 GPIO
-Status/idle	2
-Cleaning	15
-Alert	0
+Buzzer → GPIO 4
 
+Idle LED → GPIO 2
+
+Cleaning LED → GPIO 15
+
+Alert LED → GPIO 0
 Each LED:
 
 Anode (+ long leg) → 220Ω resistor → GPIO pin
@@ -18,3 +20,4 @@ Anode (+ long leg) → 220Ω resistor → GPIO pin
 Cathode (– short leg) → GND
 
 If you ever see boot issues, temporarily unplug LEDs on GPIO0/2/15 while flashing. For normal running they’re fine.
+

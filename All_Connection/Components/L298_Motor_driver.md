@@ -11,9 +11,11 @@ IN1	16	Left motor direction 1
 IN2	17	Left motor direction 2
 IN3	18	Right motor direction 1
 IN4	19	Right motor direction 2
+
+
 ENA	23 (or jumper to 5V)	Left speed (PWM)
 ENB	5 (or jumper to 5V)	Right speed (PWM)
-
+(ENA, ENB jumpered to 5V on L298N for full speed.)
 If you don’t want speed control at first:
 
 Just put jumpers from ENA → 5V and ENB → 5V and don’t connect them to ESP32.

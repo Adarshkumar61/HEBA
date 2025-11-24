@@ -1,20 +1,11 @@
-I2C bus (LCD + RTC)
+Buttons (INPUT_PULLUP)
 
-Use ESP32 default I2C pins:
+Water → GPIO 32
 
-Device	Pin on module	ESP32 GPIO
-LCD	SDA	21
-LCD	SCL	22
-RTC	SDA	21
-RTC	SCL	22
+Medicine → GPIO 33
 
-LCD VCC → 5V
+Help → GPIO 34
 
-LCD GND → GND
+Cancel → GPIO 35
 
-RTC VCC → 3.3V or 5V (DS3231 works on both, I2C level is fine)
-
-RTC GND → GND
-
-SDA lines of LCD and RTC both tie together to GPIO21.
-SCL lines of both tie together to GPIO22.
+Each button: one side to pin, other to GND.
