@@ -14,3 +14,16 @@ BATTERIES (7.4–8.4V)
          |             (SG90 motors)    (I2C)              (I2C)      VCC
          |                  |               |                |          |
      ESP32 GND pin <--same GND------------same GND--------same GND---same GND
+
+
+
+GROK:
+Battery (7.4V–12V)
+    ├──→ L298N motor power terminal (direct, more torque)
+    └──→ Buck converter input
+            └──→ Buck output 5V → powers:
+                    • ESP32 VIN
+                    • All 6 servos red wire
+                    • L298N 5V logic pin
+                    • LCD, RTC, sensors
+All GNDs connected together → one big common ground
