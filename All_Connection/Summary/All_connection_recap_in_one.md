@@ -4,11 +4,12 @@ Battery +	—	Switch → L298N 12V, Buck VIN+
 Battery –	—	L298N GND, Buck VIN–
 Buck VOUT+ (5V)	—	ESP32 5V, Servos V+, LCD VCC, RTC VCC, L298N 5V, Buzzer +, LEDs +
 Buck VOUT– (GND)	—	ESP32 GND, Servos GND, LCD GND, RTC GND, L298N GND, Buzzer –, LED –
-Servo S1 signal	Orange wire	ESP32 GPIO13
-Servo S2 signal		GPIO14
-Servo S3 signal		GPIO25
-Servo S4 signal		GPIO26
-Servo S5 signal		GPIO27
+Servo S1 signal	Orange wire	ESP32 GPIO13 Base
+Servo S2 signal		GPIO14  Shoulder 
+Servo S3 signal		GPIO25  Elbow
+Servo S4 signal		GPIO26  Wrist
+Servo S5 signal		GPIO27  Gripper (Red (VCC) → 5V battery / buck converter 5V)
+
 L298N IN1		GPIO16
 L298N IN2		GPIO17
 L298N IN3		GPIO18
