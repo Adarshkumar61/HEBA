@@ -73,7 +73,7 @@ Pose waterSeq[MAX_FRAMES];
 int  waterLen = 0;
 
 Pose medSeq[MAX_FRAMES];
-int  medLen = 0;
+int  medLen = 0;     
 
 Pose garbageSeq[MAX_FRAMES];
 int  garbageLen = 0;
