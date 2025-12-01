@@ -29,22 +29,36 @@ WebServer server(80);
 #define LED_GREEN  4
 #define LED_RED    16
 
-// ========== I2C Devices ==========
+// ========== Servos / PCA9685 ==========
+#define NUM_ARM_SERVOS 6   // arm joints
+#define NUM_SERVOS     7   // arm + wiper
+
 Adafruit_PWMServoDriver pca = Adafruit_PWMServoDriver(0x40);  // PCA9685 default
 RTC_DS3231 rtc;
-LiquidCrystal_I2C lcd(0x27, 16, 2);   // address check kar lena (0x27 ya 0x3F)
+LiquidCrystal_I2C lcd(0x27, 16, 2);   // change to 0x3F if needed
 
 // Servo channels on PCA9685
-#define SERVO_BASE     0
-#define SERVO_SHOULDER 1
-#define SERVO_ELBOW    2
-#define SERVO_WRIST    3
-#define SERVO_GRIPPER  4
-#define SERVO_WIPER    5
+// 3× MG995
+#define SERVO_BASE       0
+#define SERVO_WAIST      1
+#define SERVO_ARM2       2
+// 3× SG90/MG90
+#define SERVO_END_ARM2   3
+#define SERVO_ARM3       4
+#define SERVO_HOLDER     5
+// Separate front wiper
+#define SERVO_WIPER      6
 
-// Servo PWM limits (thoda tune karna padega)
-#define SERVO_MIN  120   // tweak per servo
+// Servo PWM limits (tune if needed)
+#define SERVO_MIN  120
 #define SERVO_MAX  600
+
+// Wiper timing (approx full cycle ~4s)
+#define WIPER_STEP_DEG        3
+#define WIPER_MIN_ANGLE       0
+#define WIPER_MAX_ANGLE       180
+#define WIPER_HALF_PERIOD_MS  2000UL            // 0→180 ~2s
+#define WIPER_STEP_MS         (WIPER_HALF_PERIOD_MS * WIPER_STEP_DEG / 180)
 
 // ===== Mode system =====
 enum RobotMode {
@@ -63,9 +77,9 @@ RobotMode prevMode    = MODE_IDLE;
 #define MAX_FRAMES 20
 
 struct Pose {
-  uint8_t servo[6];   // 0-180 deg
-  int16_t leftSpeed;  // -255..255
-  int16_t rightSpeed; // -255..255
+  uint8_t  servo[NUM_ARM_SERVOS];   // only 6 arm servos
+  int16_t  leftSpeed;               // -255..255
+  int16_t  rightSpeed;              // -255..255
   uint16_t durationMs;
 };
 
@@ -82,20 +96,25 @@ Pose cleanSeq[MAX_FRAMES];
 int  cleanLen = 0;
 
 // Current manual control state
-uint8_t currentServoAngles[6] = {90,90,90,90,90,90};
+uint8_t currentServoAngles[NUM_SERVOS] = {90,90,90,90,90,90,90};
 int16_t currentLeftSpeed  = 0;
 int16_t currentRightSpeed = 0;
 
 // Playback state
-bool playing = false;
-Pose* playSeq = nullptr;
-int   playLen = 0;
-int   playIndex = 0;
-unsigned long playStartTime = 0;
+bool          playing        = false;
+Pose*         playSeq        = nullptr;
+int           playLen        = 0;
+int           playIndex      = 0;
+int           lastFrameIndex = -1;
 unsigned long frameStartTime = 0;
 
 // RTC scheduling
 int lastScheduleMinute = -1;
+
+// Wiper state (continuous sweep)
+int           wiperAngle      = WIPER_MIN_ANGLE;
+int           wiperDir        = +1;   // +1 up, -1 down
+unsigned long lastWiperUpdate = 0;
 
 // ========== Utility: map angle to PCA pulse ==========
 uint16_t angleToPulse(uint8_t angle) {
@@ -103,7 +122,7 @@ uint16_t angleToPulse(uint8_t angle) {
 }
 
 void setServo(uint8_t ch, uint8_t angle) {
-  if (ch >= 6) return;
+  if (ch >= NUM_SERVOS) return;
   currentServoAngles[ch] = angle;
   uint16_t pulse = angleToPulse(angle);
   pca.setPWM(ch, 0, pulse);
@@ -221,7 +240,7 @@ void updateLCD() {
 bool savePoseToSeq(Pose* seq, int &len, uint16_t durMs) {
   if (len >= MAX_FRAMES) return false;
   Pose &p = seq[len];
-  for (int i=0;i<6;i++) p.servo[i] = currentServoAngles[i];
+  for (int i=0;i<NUM_ARM_SERVOS;i++) p.servo[i] = currentServoAngles[i]; // 0..5 only
   p.leftSpeed  = currentLeftSpeed;
   p.rightSpeed = currentRightSpeed;
   p.durationMs = durMs;
@@ -229,16 +248,64 @@ bool savePoseToSeq(Pose* seq, int &len, uint16_t durMs) {
   return true;
 }
 
+// ========== Hardcoded DEMO cleaning sequence ==========
+void initDemoCleaningSequence() {
+  cleanLen = 0;
+  Pose p;
+
+  // Frame 0: neutral arm, robot still
+  p.servo[0] = 90;   // base
+  p.servo[1] = 90;   // waist
+  p.servo[2] = 90;   // arm2
+  p.servo[3] = 90;   // end arm2
+  p.servo[4] = 90;   // arm3
+  p.servo[5] = 60;   // holder (adjust)
+  p.leftSpeed  = 0;
+  p.rightSpeed = 0;
+  p.durationMs = 800;
+  cleanSeq[cleanLen++] = p;
+
+  // Frame 1: slight forward move
+  p.leftSpeed  = 140;
+  p.rightSpeed = 140;
+  p.durationMs = 1800;
+  cleanSeq[cleanLen++] = p;
+
+  // Frame 2: LEFT sweep
+  p.leftSpeed  = -120;
+  p.rightSpeed = 120;
+  p.durationMs = 800;
+  cleanSeq[cleanLen++] = p;
+
+  // Frame 3: RIGHT sweep
+  p.leftSpeed  = 120;
+  p.rightSpeed = -120;
+  p.durationMs = 800;
+  cleanSeq[cleanLen++] = p;
+
+  // Frame 4: Move back
+  p.leftSpeed  = -140;
+  p.rightSpeed = -140;
+  p.durationMs = 1800;
+  cleanSeq[cleanLen++] = p;
+
+  // Frame 5: stop
+  p.leftSpeed  = 0;
+  p.rightSpeed = 0;
+  p.durationMs = 1000;
+  cleanSeq[cleanLen++] = p;
+}
+
 // ========== Start playing a sequence ==========
 void startPlay(Pose* seq, int len, RobotMode mode) {
   if (len <= 0) return;
-  playSeq = seq;
-  playLen = len;
-  playIndex = 0;
-  playing = true;
-  playStartTime = millis();
+  playSeq        = seq;
+  playLen        = len;
+  playIndex      = 0;
+  lastFrameIndex = -1;
+  playing        = true;
   frameStartTime = millis();
-  currentMode = mode;
+  currentMode    = mode;
   updateLEDs();
 }
 
@@ -249,11 +316,10 @@ void handlePlayback() {
   unsigned long now = millis();
   Pose &cur = playSeq[playIndex];
 
-  // Apply current frame (only once at frame start)
-  static int lastFrameIndex = -1;
+  // Apply current frame once when index changes
   if (playIndex != lastFrameIndex) {
-    // set servos & motors
-    for (int i=0;i<6;i++) setServo(i, cur.servo[i]);
+    for (int i=0;i<NUM_ARM_SERVOS;i++)
+      setServo(i, cur.servo[i]);   // 0..5 arm only
     setMotors(cur.leftSpeed, cur.rightSpeed);
     frameStartTime = now;
     lastFrameIndex = playIndex;
@@ -262,14 +328,38 @@ void handlePlayback() {
   if (now - frameStartTime >= cur.durationMs) {
     playIndex++;
     if (playIndex >= playLen) {
-      // finished
-      playing = false;
+      playing        = false;
+      playSeq        = nullptr;
+      playLen        = 0;
+      playIndex      = 0;
+      lastFrameIndex = -1;
       stopMotors();
       currentMode = MODE_IDLE;
       updateLEDs();
-      lastFrameIndex = -1;
     }
   }
+}
+
+// ========== Continuous wiper update (non-blocking) ==========
+void updateWiper() {
+  // Only run in cleaning mode & not obstacle stop
+  if (currentMode != MODE_CLEANING) return;
+
+  unsigned long now = millis();
+  if (now - lastWiperUpdate < WIPER_STEP_MS) return;
+  lastWiperUpdate = now;
+
+  wiperAngle += wiperDir * WIPER_STEP_DEG;
+
+  if (wiperAngle >= WIPER_MAX_ANGLE) {
+    wiperAngle = WIPER_MAX_ANGLE;
+    wiperDir   = -1;
+  } else if (wiperAngle <= WIPER_MIN_ANGLE) {
+    wiperAngle = WIPER_MIN_ANGLE;
+    wiperDir   = +1;
+  }
+
+  setServo(SERVO_WIPER, wiperAngle);
 }
 
 // ========== WiFi Handlers ==========
@@ -295,11 +385,11 @@ void handleDrive() {
   server.send(200, "text/plain", "OK drive " + cmd);
 }
 
-// 2) Servo control: /servo?ch=0&ang=90
+// 2) Servo control: /servo?ch=0-6&ang=0-180
 void handleServo() {
   int ch  = server.hasArg("ch") ? server.arg("ch").toInt() : -1;
   int ang = server.hasArg("ang") ? server.arg("ang").toInt() : 90;
-  if (ch < 0 || ch > 5) {
+  if (ch < 0 || ch >= NUM_SERVOS) {
     server.send(400, "text/plain", "bad channel");
     return;
   }
@@ -339,7 +429,6 @@ void handlePlay() {
   } else if (mode == "garbage") {
     startPlay(garbageSeq, garbageLen, MODE_GARBAGE);
   } else if (mode == "clean") {
-    // Cleaning mode: make sure wiper goes down in your taught frames
     startPlay(cleanSeq, cleanLen, MODE_CLEANING);
   }
   server.send(200, "text/plain", "Play triggered");
@@ -349,7 +438,7 @@ void handlePlay() {
 void handleRoot() {
   String msg = "HEBA Robot API:\n";
   msg += "/drive?cmd=F/B/L/R/S\n";
-  msg += "/servo?ch=0-5&ang=0-180\n";
+  msg += "/servo?ch=0-6&ang=0-180\n";
   msg += "/save?mode=water|med|garbage|clean&dur=ms\n";
   msg += "/play?mode=water|med|garbage|clean\n";
   server.send(200, "text/plain", msg);
@@ -441,7 +530,6 @@ void setup() {
     Serial.println("RTC not found!");
   }
   if (rtc.lostPower()) {
-    // Set to compile time once
     rtc.adjust(DateTime(F(__DATE__), F(__TIME__)));
   }
 
@@ -465,8 +553,15 @@ void setup() {
   server.begin();
   Serial.println("HTTP server started");
 
-  // Start position
-  for (int i=0;i<6;i++) setServo(i, 90);
+  // Start position (all servos 90 deg)
+  for (int i=0;i<NUM_SERVOS;i++) setServo(i, 90);
+
+  // Wiper start at 0°
+  wiperAngle = WIPER_MIN_ANGLE;
+  setServo(SERVO_WIPER, wiperAngle);
+
+  // Hardcoded demo cleaning sequence ready
+  initDemoCleaningSequence();
 
   currentMode = MODE_IDLE;
   updateLEDs();
@@ -482,6 +577,7 @@ void loop() {
   checkObstacle();         // obstacle logic
   handleSchedule();        // RTC-based schedules
   handlePlayback();        // play taught sequences
+  updateWiper();           // continuous wiper (for cleaning mode)
 
   // LCD refresh every ~1s when not obstacle
   if (currentMode != MODE_OBSTACLE_STOP) {
