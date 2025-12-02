@@ -2,8 +2,7 @@ ESP32 Dev Board *
 ✔ 5 DOF Arm Kit *
 ✔ 5 × SG90 Servos *
 ✔ 2 BO Motors +
-✔ Wheels +
- Caster *
+
 ✔ L298N Motor Driver *
 ✔ DS3231 RTC * +
 ✔ 16×2 I2C LCD * 
@@ -18,5 +17,5 @@ ESP32 Dev Board *
 ✔ Jumper Wires *
 ✔ Foam Board (Robot Body) *
 ✔ Nuts, Bolts, Zip Ties *
-
+Pca
 USB cable
