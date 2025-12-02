@@ -1,6 +1,7 @@
 ESP32 Dev Board *
 ✔ 5 DOF Arm Kit *
-✔ 5 × SG90 Servos *
+✔ 4 × SG90 Servos *
+3 * Mg996R Motors
 ✔ 2 BO Motors +
 
 ✔ L298N Motor Driver *
