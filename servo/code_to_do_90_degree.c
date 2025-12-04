@@ -13,7 +13,7 @@ void setup() {
 
   // Move Channel 0 servo to 90 degrees
   int pulse = map(90, 0, 180, SERVO_MIN, SERVO_MAX);
-  pwm.setPWM(0, 0, pulse);
+  pwm.setPWM(0, 0, pulse); 
 }
 
 void loop() {}
