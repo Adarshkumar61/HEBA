@@ -495,3 +495,370 @@ void loadSequences() {
   }
   Serial.println("Sequences loaded from EEPROM");
 }
+
+
+
+
+// for arm only :
+
+#include <WiFi.h>
+#include <WebServer.h>
+#include <Wire.h>
+#include <Adafruit_PWMServoDriver.h>
+#include <Preferences.h>
+
+// WiFi credentials
+const char* ssid = "RoboArm_5DOF";
+const char* password = "12345678";
+
+// PCA9685
+Adafruit_PWMServoDriver pca = Adafruit_PWMServoDriver(0x40);
+Preferences preferences;
+
+WebServer server(80);
+
+// SERVO CONFIGURATION
+// Channels 0,1,2 = MG996R (bigger servos)
+// Channels 3,4,5 = SG90 (smaller servos)
+
+// MG996R pulse values (CHANGE TO YOUR WORKING SET!)
+// If SET A worked: 150, 300, 450
+// If SET B worked: 205, 307, 410
+// If SET C worked: 175, 375, 575
+#define MG_MIN 205
+#define MG_MID 307
+#define MG_MAX 410
+
+// SG90 pulse values (standard)
+#define SG_MIN 150
+#define SG_MID 300
+#define SG_MAX 450
+
+// Servo structure
+struct Servo {
+  int channel;
+  int angle;
+  int minPulse;
+  int maxPulse;
+  String name;
+};
+
+Servo servos[6] = {
+  {0, 90, MG_MIN, MG_MAX, "Base"},      // MG996R
+  {1, 90, MG_MIN, MG_MAX, "Shoulder"},  // MG996R
+  {2, 90, MG_MIN, MG_MAX, "Elbow"},     // MG996R
+  {3, 90, SG_MIN, SG_MAX, "Wrist"},     // SG90
+  {4, 90, SG_MIN, SG_MAX, "Rotate"},    // SG90
+  {5, 90, SG_MIN, SG_MAX, "Gripper"}    // SG90
+};
+
+// Training mode
+#define MAX_POSITIONS 50
+struct Position {
+  int angles[6];
+  int delayTime;
+};
+
+Position trainedSequence[MAX_POSITIONS];
+int sequenceLength = 0;
+bool isTraining = false;
+bool isPlaying = false;
+
+int angleToPulse(int angle, int minPulse, int maxPulse) {
+  angle = constrain(angle, 0, 180);
+  return map(angle, 0, 180, minPulse, maxPulse);
+}
+
+void moveServo(int index, int angle) {
+  servos[index].angle = constrain(angle, 0, 180);
+  int pulse = angleToPulse(servos[index].angle, servos[index].minPulse, servos[index].maxPulse);
+  pca.setPWM(servos[index].channel, 0, pulse);
+}
+
+void moveAllToHome() {
+  for(int i = 0; i < 6; i++) {
+    moveServo(i, 90);
+  }
+}
+
+void saveSequence() {
+  preferences.begin("robotarm", false);
+  preferences.putInt("seqLen", sequenceLength);
+  
+  for(int i = 0; i < sequenceLength; i++) {
+    String key = "pos" + String(i);
+    uint8_t data[28]; // 6 angles * 4 bytes + 1 delay * 4 bytes
+    
+    for(int j = 0; j < 6; j++) {
+      memcpy(&data[j*4], &trainedSequence[i].angles[j], 4);
+    }
+    memcpy(&data[24], &trainedSequence[i].delayTime, 4);
+    
+    preferences.putBytes(key.c_str(), data, 28);
+  }
+  
+  preferences.end();
+  Serial.println("✅ Sequence saved!");
+}
+
+void loadSequence() {
+  preferences.begin("robotarm", true);
+  sequenceLength = preferences.getInt("seqLen", 0);
+  
+  for(int i = 0; i < sequenceLength; i++) {
+    String key = "pos" + String(i);
+    uint8_t data[28];
+    preferences.getBytes(key.c_str(), data, 28);
+    
+    for(int j = 0; j < 6; j++) {
+      memcpy(&trainedSequence[i].angles[j], &data[j*4], 4);
+    }
+    memcpy(&trainedSequence[i].delayTime, &data[24], 4);
+  }
+  
+  preferences.end();
+  Serial.println("✅ Sequence loaded: " + String(sequenceLength) + " positions");
+}
+
+void playSequence() {
+  if(sequenceLength == 0) return;
+  
+  isPlaying = true;
+  Serial.println("▶️ Playing sequence...");
+  
+  for(int i = 0; i < sequenceLength && isPlaying; i++) {
+    // Move all servos to position
+    for(int j = 0; j < 6; j++) {
+      moveServo(j, trainedSequence[i].angles[j]);
+    }
+    
+    Serial.print("Position ");
+    Serial.print(i + 1);
+    Serial.print("/");
+    Serial.println(sequenceLength);
+    
+    delay(trainedSequence[i].delayTime);
+  }
+  
+  isPlaying = false;
+  Serial.println("✅ Playback complete!");
+}
+
+String getHTML() {
+  String html = "<!DOCTYPE html><html><head>";
+  html += "<meta name='viewport' content='width=device-width, initial-scale=1'>";
+  html += "<style>";
+  html += "body{font-family:Arial;margin:0;padding:20px;background:#0a0a0a;color:#fff}";
+  html += ".container{max-width:800px;margin:0 auto}";
+  html += "h1{text-align:center;color:#00ff88;text-shadow:0 0 10px #00ff88}";
+  html += ".mode{display:flex;gap:10px;margin:20px 0}";
+  html += ".mode button{flex:1;padding:15px;font-size:18px;border:none;cursor:pointer;border-radius:8px}";
+  html += ".active{background:#00ff88;color:#000}";
+  html += ".inactive{background:#333;color:#fff}";
+  html += ".servo-control{background:#1a1a1a;padding:15px;margin:10px 0;border-radius:8px;border:1px solid #333}";
+  html += ".servo-name{color:#00ff88;font-size:20px;margin-bottom:10px}";
+  html += ".servo-value{color:#fff;font-size:24px;text-align:center;margin:10px 0}";
+  html += "input[type=range]{width:100%;height:40px;margin:10px 0}";
+  html += ".controls{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:20px 0}";
+  html += "button{background:#00ff88;border:none;color:#000;padding:15px;font-size:16px;";
+  html += "cursor:pointer;border-radius:8px;font-weight:bold}";
+  html += "button:hover{background:#00cc70}";
+  html += ".train-btn{background:#ff9500}";
+  html += ".train-btn:hover{background:#cc7700}";
+  html += ".danger{background:#ff3b30}";
+  html += ".danger:hover{background:#cc2f26}";
+  html += ".info{background:#1a1a1a;padding:15px;margin:20px 0;border-radius:8px;border:1px solid #00ff88}";
+  html += "</style></head><body>";
+  html += "<div class='container'>";
+  html += "<h1>🦾 5-DOF ROBOTIC ARM</h1>";
+  
+  // Mode selection
+  html += "<div class='mode'>";
+  html += "<button class='" + String(isTraining ? "active" : "inactive") + "' onclick='setMode(\"train\")'>📝 TRAIN</button>";
+  html += "<button class='" + String(!isTraining ? "active" : "inactive") + "' onclick='setMode(\"control\")'>🎮 CONTROL</button>";
+  html += "</div>";
+  
+  // Info panel
+  html += "<div class='info'>";
+  html += "<strong>Saved Positions:</strong> " + String(sequenceLength) + "/" + String(MAX_POSITIONS);
+  html += "<br><strong>Status:</strong> " + String(isPlaying ? "Playing ▶️" : isTraining ? "Training 📝" : "Ready ✓");
+  html += "</div>";
+  
+  // Servo controls
+  for(int i = 0; i < 6; i++) {
+    html += "<div class='servo-control'>";
+    html += "<div class='servo-name'>" + servos[i].name + "</div>";
+    html += "<div class='servo-value' id='val" + String(i) + "'>" + String(servos[i].angle) + "°</div>";
+    html += "<input type='range' min='0' max='180' value='" + String(servos[i].angle) + "' ";
+    html += "oninput='updateServo(" + String(i) + ",this.value)'>";
+    html += "</div>";
+  }
+  
+  // Control buttons
+  html += "<div class='controls'>";
+  html += "<button onclick='home()'>🏠 HOME</button>";
+  html += "<button onclick='stopAll()'>⛔ STOP</button>";
+  html += "<button class='train-btn' onclick='capturePosition()'>📸 CAPTURE</button>";
+  html += "<button onclick='playSequence()'>▶️ PLAY</button>";
+  html += "<button onclick='saveSequence()'>💾 SAVE</button>";
+  html += "<button onclick='loadSequence()'>📂 LOAD</button>";
+  html += "<button class='danger' onclick='clearSequence()'>🗑️ CLEAR</button>";
+  html += "</div>";
+  
+  html += "</div>";
+  
+  html += "<script>";
+  html += "function updateServo(idx,val){";
+  html += "document.getElementById('val'+idx).innerText=val+'°';";
+  html += "fetch('/servo?idx='+idx+'&angle='+val);}";
+  html += "function setMode(m){fetch('/mode?m='+m).then(()=>location.reload());}";
+  html += "function home(){fetch('/home').then(()=>location.reload());}";
+  html += "function stopAll(){fetch('/stop').then(()=>location.reload());}";
+  html += "function capturePosition(){fetch('/capture').then(r=>r.text()).then(t=>alert(t));}";
+  html += "function playSequence(){if(confirm('Play sequence?')){fetch('/play');alert('Playing...');}}";
+  html += "function saveSequence(){fetch('/save').then(()=>alert('Saved!'));}";
+  html += "function loadSequence(){fetch('/load').then(()=>location.reload());}";
+  html += "function clearSequence(){if(confirm('Clear all positions?')){fetch('/clear').then(()=>location.reload());}}";
+  html += "</script></body></html>";
+  
+  return html;
+}
+
+void handleRoot() {
+  server.send(200, "text/html", getHTML());
+}
+
+void handleServo() {
+  if(server.hasArg("idx") && server.hasArg("angle")) {
+    int idx = server.arg("idx").toInt();
+    int angle = server.arg("angle").toInt();
+    moveServo(idx, angle);
+    server.send(200, "text/plain", "OK");
+  }
+}
+
+void handleMode() {
+  if(server.hasArg("m")) {
+    String mode = server.arg("m");
+    isTraining = (mode == "train");
+    server.send(200, "text/plain", "OK");
+  }
+}
+
+void handleHome() {
+  moveAllToHome();
+  server.send(200, "text/plain", "OK");
+}
+
+void handleStop() {
+  isPlaying = false;
+  for(int i = 0; i < 16; i++) {
+    pca.setPWM(i, 0, 0);
+  }
+  server.send(200, "text/plain", "OK");
+}
+
+void handleCapture() {
+  if(sequenceLength >= MAX_POSITIONS) {
+    server.send(400, "text/plain", "Sequence full!");
+    return;
+  }
+  
+  for(int i = 0; i < 6; i++) {
+    trainedSequence[sequenceLength].angles[i] = servos[i].angle;
+  }
+  trainedSequence[sequenceLength].delayTime = 1000; // 1 sec default
+  
+  sequenceLength++;
+  server.send(200, "text/plain", "Position " + String(sequenceLength) + " captured!");
+}
+
+void handlePlay() {
+  playSequence();
+  server.send(200, "text/plain", "OK");
+}
+
+void handleSave() {
+  saveSequence();
+  server.send(200, "text/plain", "OK");
+}
+
+void handleLoad() {
+  loadSequence();
+  server.send(200, "text/plain", "OK");
+}
+
+void handleClear() {
+  sequenceLength = 0;
+  preferences.begin("robotarm", false);
+  preferences.clear();
+  preferences.end();
+  server.send(200, "text/plain", "OK");
+}
+
+void setup() {
+  Serial.begin(115200);
+  delay(2000);
+  
+  Serial.println("\n\n╔════════════════════════════════════╗");
+  Serial.println("║   5-DOF ROBOTIC ARM CONTROL       ║");
+  Serial.println("╚════════════════════════════════════╝\n");
+  
+  // Initialize I2C
+  Wire.begin(21, 22);
+  
+  // Initialize PCA9685
+  pca.begin();
+  pca.setPWMFreq(50);
+  delay(100);
+  
+  // Turn off all channels
+  for(int i = 0; i < 16; i++) {
+    pca.setPWM(i, 0, 0);
+  }
+  
+  // Move to home position
+  moveAllToHome();
+  Serial.println("✅ All servos at home (90°)");
+  
+  // Load saved sequence
+  loadSequence();
+  
+  // Start WiFi AP
+  WiFi.mode(WIFI_AP);
+  WiFi.softAP(ssid, password);
+  
+  IPAddress IP = WiFi.softAPIP();
+  
+  Serial.println("\n╔════════════════════════════════════╗");
+  Serial.println("║        WiFi AP Started            ║");
+  Serial.println("╠════════════════════════════════════╣");
+  Serial.print("║ SSID: ");
+  Serial.println(ssid);
+  Serial.print("║ Pass: ");
+  Serial.println(password);
+  Serial.print("║ IP:   ");
+  Serial.println(IP);
+  Serial.println("╚════════════════════════════════════╝\n");
+  
+  // Setup routes
+  server.on("/", handleRoot);
+  server.on("/servo", handleServo);
+  server.on("/mode", handleMode);
+  server.on("/home", handleHome);
+  server.on("/stop", handleStop);
+  server.on("/capture", handleCapture);
+  server.on("/play", handlePlay);
+  server.on("/save", handleSave);
+  server.on("/load", handleLoad);
+  server.on("/clear", handleClear);
+  
+  server.begin();
+  Serial.println("🌐 Web server started!");
+  Serial.println("📱 Connect to: RoboArm_5DOF");
+  Serial.println("🌍 Open: http://192.168.4.1\n");
+}
+
+void loop() {
+  server.handleClient();
+}
