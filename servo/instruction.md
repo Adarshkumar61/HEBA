@@ -2,7 +2,8 @@ STEP TO CALIBRATE (DO EXACTLY THIS):
 1️⃣ Connect ESP32 → PCA9685 using 4 wires
 
 SDA, SCL, VCC, GND
-
+SDA = GPIO 21
+SCL = GPIO 22
 2️⃣ Connect ONE servo to PCA9685 CH0
 3️⃣ Upload this code to ESP32:
 #include <Wire.h>
