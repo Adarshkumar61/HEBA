@@ -517,6 +517,11 @@ Preferences preferences;
 
 WebServer server(80);
 
+
+
+
+
+# this is for the current heba: 
 // SERVO CONFIGURATION
 // Channels 0,1,2 = MG996R (bigger servos)
 // Channels 3,4,5 = SG90 (smaller servos)
