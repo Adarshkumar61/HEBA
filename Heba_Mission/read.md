@@ -1,4 +1,6 @@
+                                    H     E    B    A
 
+HEBA stands for:
 
 H – Health
 E – Elderly
