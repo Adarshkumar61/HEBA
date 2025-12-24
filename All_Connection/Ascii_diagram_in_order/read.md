@@ -1,5 +1,5 @@
                      ┌──────────────────────────────────────────┐
-                     │                FRONT SIDE                 │
+                     │                FRONT SIDE                 │   
                      │                                          │
                      │        [ ULTRASONIC SENSOR ]             │
                      │        TRIG→5      ECHO→18               │
