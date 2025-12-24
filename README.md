@@ -1,3 +1,15 @@
+<p align="center">
+  <img src="demo/banner.png" width="90%">
+</p>
+
+<h1 align="center">🤖 HEBA – Assistive Robotic Arm</h1>
+
+<p align="center">
+  <b>Hospital • Elderly • Bachelors Assistant Robot</b>
+</p>
+
+
+
 # 🤖 HEBA: Robotic Arm for Hospitals, Elderly & Bachelors
 ========================================================
 
