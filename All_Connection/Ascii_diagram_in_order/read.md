@@ -3,7 +3,7 @@
                      │                                          │
                      │        [ ULTRASONIC SENSOR ]             │
                      │        TRIG→5      ECHO→18               │
-                     │                |                          │
+                     │                |                          │  
                      │           [ WIPER SERVO ]  (PCA CH6)      │
                      ├──────────────────────────────────────────┤
                      │                                          │
