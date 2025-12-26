@@ -1,201 +1,187 @@
-<p align="center">
-  <img src="demo/banner.png" width="90%">
+<h1 align="center" style="font-size:38px;">
+🤖 HEBA – Assistive Robotic Arm
+</h1>
+
+<p align="center" style="font-size:18px; color:#B0B0B0;">
+Hospital • Elderly • Bachelors Assistant Robot
 </p>
 
-<h1 align="center">🤖 HEBA – Assistive Robotic Arm</h1>
-
-<p align="center">
-  <b>Hospital • Elderly • Bachelors Assistant Robot</b>
-</p>
-
-<p align="center">
+<p align="center" style="font-size:15px;">
 ========================================================
 </p>
-_A modular, practical robotic arm system designed for healthcare, elderly assistance, and everyday automation using embedded control and mechanical integration._
 
-This repository contains the **HEBA robotic arm project**, including hardware connections, servo control, mission logic, diagrams, and instructions to build and control the robot.
+<p align="center" style="font-size:16px;">
+<i>
+A modular, practical robotic arm system designed for healthcare, elderly assistance, and everyday automation using embedded control and mechanical integration.
+</i>
+</p>
 
----
+<p align="center" style="font-size:16px;">
+This repository contains the HEBA robotic arm project, including hardware connections, servo control, mission logic, diagrams, and step-by-step instructions to build and operate the robot.
+</p>
 
-## 🎯 Project Summary
---------------------------------------------------
+<br>
 
-**HEBA** stands for **Hospital, Elderly, Bachelors Assistant** — a robotic arm designed to assist in **simple pick-and-place tasks**, **delivery operations**, and **basic interaction in assistive environments**.
+<h2 align="center" style="font-size:28px;">🎯 Project Summary</h2>
 
-The goal is to provide an affordable, modular robotic arm that can:
-- 🤲 Assist with lightweight object delivery
-- 🩺 Support elderly or disabled users
-- 🏠 Help with daily tasks for bachelors or home automation
-- 🚀 Serve as an educational robotics platform
+<p align="center" style="font-size:16px;">
+<b>HEBA</b> stands for <b>Hospital, Elderly, Bachelors Assistant</b> — a robotic arm designed to assist in simple pick-and-place tasks, delivery operations, and basic interaction in assistive environments.
+</p>
 
----
+<p align="center" style="font-size:16px;">The primary goals of HEBA are:</p>
 
-## 🧰 Key Features
---------------------------------------------------
+<p align="center" style="font-size:16px;">
+🤲 Assist with lightweight object delivery<br>
+🩺 Support elderly or disabled users<br>
+🏠 Help with daily tasks for bachelors or home automation<br>
+🚀 Serve as an educational robotics and embedded systems platform
+</p>
 
-### 🔹 Modular Hardware
-- Predefined mechanical connections for servos, frame parts, and joints
-- Full connection layout and diagrams
+<br>
 
-### 🔹 Servo Control System
-- Centralized servo motor control
-- Smooth motion and angle adjustments
+<h2 align="center" style="font-size:28px;">🧰 Key Features</h2>
 
-### 🔹 Mission Logic
-- Defined missions and actions for arm movement
-- Can be extended for automation tasks
+<p align="center" style="font-size:17px;"><b>🔹 Modular Hardware</b></p>
+<p align="center" style="font-size:16px;">
+Predefined mechanical connections for servos and joints<br>
+Complete hardware connection layouts and diagrams
+</p>
 
-### 🔹 Resources Included
-- Wiring diagrams
-- Required item lists
-- Code modules
-- Project images and sketches
+<p align="center" style="font-size:17px;"><b>🔹 Servo Control System</b></p>
+<p align="center" style="font-size:16px;">
+Centralized servo motor control<br>
+Smooth and precise angle-based movement
+</p>
 
----
+<p align="center" style="font-size:17px;"><b>🔹 Mission Logic</b></p>
+<p align="center" style="font-size:16px;">
+Predefined motion missions for robotic tasks<br>
+Easily extendable for automation scenarios
+</p>
 
-## 🗂️ Repository Structure
---------------------------------------------------
+<p align="center" style="font-size:17px;"><b>🔹 Resources Included</b></p>
+<p align="center" style="font-size:16px;">
+Wiring diagrams<br>
+Required item lists (BoM)<br>
+Code modules<br>
+Project images and sketches
+</p>
 
+<br>
+
+<h2 align="center" style="font-size:28px;">🗂️ Repository Structure</h2>
+
+<pre align="center">
 HEBA/
 │
-├── All_Connection/ # Hardware wiring diagrams and connection docs
+├── All_Connection/        # Hardware wiring diagrams
+├── CLAUDE/code/           # Core control logic
+├── Diagram/               # Mechanical & circuit diagrams
+├── GPT/Code/              # AI-assisted code
+├── Heba_Mission/          # Mission sequencing
+├── Instructions/          # Step-by-step guides
+├── Pics/                  # Project images
+├── Required_Item_list/    # Bill of materials
+├── servo/                 # Servo control modules
+└── README.md
+</pre>
 
-├── CLAUDE/ code/ # Code and modules related to CLAUDE logic
+<br>
 
-├── Diagram/ # Mechanical and circuit diagrams
+<h2 align="center" style="font-size:28px;">🧠 Technologies Used</h2>
 
-├── GPT/ Code/ # Code generated with help of GPT tools
+<p align="center" style="font-size:16px;">
+🧩 Servo Motors for mechanical motion<br>
+🔌 Microcontroller & control logic<br>
+🛠️ Embedded C / Arduino-based programming<br>
+📊 Wiring diagrams and circuit layouts<br>
+📷 Project photos and visuals
+</p>
 
-├── Heba_Mission/ # Mission sequence and action planning
+<br>
 
-├── Instructions/ # Step-by-step setup instructions
+<h2 align="center" style="font-size:28px;">⚙️ Setup Instructions</h2>
 
-├── Pics/ # Photos of hardware and setup
+<p align="center" style="font-size:16px;">
+<b>1️⃣ Gather Required Materials</b><br>
+Refer to the <code>Required_Item_list/</code> folder<br><br>
+Servos • Microcontroller • Power supply • Frame components
+</p>
 
-├── Required_Item_list/ # BOM (bill of materials) and parts list
+<p align="center" style="font-size:16px;">
+<b>2️⃣ Hardware Connections</b><br>
+Use diagrams from <code>All_Connection/</code> and <code>Diagram/</code><br>
+Assemble the robotic arm and connect servos correctly
+</p>
 
-├── servo/ # Servo control code and configs
+<p align="center" style="font-size:16px;">
+<b>3️⃣ Upload Code</b><br>
+Navigate to <code>servo/</code> or <code>CLAUDE/code/</code><br>
+Upload code using Arduino IDE or PlatformIO
+</p>
 
-└── README.md # Project documentation
+<p align="center" style="font-size:16px;">
+<b>4️⃣ Run Mission Logic</b><br>
+Execute missions from <code>Heba_Mission/</code><br>
+Ensure servos are calibrated before running
+</p>
 
+<br>
 
----
+<h2 align="center" style="font-size:28px;">📸 Visual Demo</h2>
 
-## 🧠 Technologies Used
---------------------------------------------------
+<p align="center">
+<img src="Pics/hardware_setup.jpg" width="65%">
+</p>
 
-- 🧩 **Servo Motors** for mechanical motion
-- 🔌 **Microcontroller / Control Logic**
-- 🛠️ **Embedded C / Arduino / Customized Code**
-- 📊 **Wiring and Diagrams for hardware setup**
-- 📷 **Project photos & visuals**
+<p align="center" style="font-size:16px;"><b>🧱 Hardware Setup</b></p>
 
----
+<p align="center">
+<img src="Pics/arm_motion.jpg" width="65%">
+</p>
 
-## ⚙️ Setup Instructions
---------------------------------------------------
+<p align="center" style="font-size:16px;"><b>🎯 Arm in Action</b></p>
 
-### 1️⃣ Gather Required Materials
-Reference the components list:
+<br>
 
-Add the parts you need for:
-- Servos
-- Microcontroller board
-- Power supply
-- Frame parts and screws
+<h2 align="center" style="font-size:28px;">🧪 Expected Behavior</h2>
 
-*(A BoM table should be added in that folder if not already present.)*
+<p align="center" style="font-size:16px;">
+✔ Robotic arm powers up correctly<br>
+✔ Servos move according to logic<br>
+✔ Missions execute step-by-step<br>
+✔ System responds reliably to commands
+</p>
 
----
+<br>
 
-### 2️⃣ Hardware Connections
-Open:
+<h2 align="center" style="font-size:28px;">📚 Learning Outcomes</h2>
 
-Follow the wiring diagrams and assembly sketches.  
-Build the robotic arm frame and connect servos as per the circuit.
+<p align="center" style="font-size:16px;">
+🤖 Robotic arm kinematics & mechanics<br>
+🔧 Servo control & embedded programming<br>
+💡 Hardware wiring & integration<br>
+📐 Motion planning & task sequencing
+</p>
 
----
+<br>
 
-### 3️⃣ Upload Code to Microcontroller
-Go to:
+<h2 align="center" style="font-size:28px;">🚀 Future Enhancements</h2>
 
-Choose the appropriate code file and upload to the controller using your IDE (Arduino / PlatformIO).
+<p align="center" style="font-size:16px;">
+🤖 Sensor feedback (encoders, limit switches)<br>
+📡 Bluetooth / Wi-Fi control<br>
+📲 Mobile app interface<br>
+📊 Vision-based object recognition<br>
+🩺 Healthcare-focused extensions
+</p>
 
----
+<br>
 
-### 4️⃣ Run the Control Logic
-Use:
+<h2 align="center" style="font-size:28px;">👨‍💻 Author</h2>
 
-to execute predefined movement sequences.  
-Ensure power is connected and servos are properly calibrated before running.
-
----
-
-## 📸 Visual Demo
---------------------------------------------------
-
-
-
-```md
-### 🧱 Hardware Setup
-![Hardware Setup](Pics/hardware_setup.jpg)
-
-### 🎯 Arm in Action
-![Arm Motion](Pics/arm_motion.jpg)
-
-🧪 Expected Behavior
-
-✔ The robotic arm powers up
-✔ Servos move according to instructions
-✔ Missions run as sequences of motions
-✔ The system holds position and responds to commands
-
-📈 Mission & Logic
-
-Inside:
-
-Heba_Mission/
-
-
-You’ll find mission sequences like:
-
-Home position
-
-Pick position
-
-Place position
-
-Return to idle
-
-These define how HEBA should behave in specific use-cases.
-
-📚 Learning Outcomes
-
-By building and completing HEBA you will learn:
-
-🤖 Robotic arm kinematics and mechanics
-
-🔧 Servo control and embedded programming
-
-💡 Hardware wiring and circuit integration
-
-📐 Planning of motion sequences and tasks
-
-🚀 Future Enhancements
-
-🤖 Add sensor feedback (limit switches, encoders)
-
-📡 Integrate Bluetooth / Wi-Fi control
-
-📲 Control via mobile app
-
-📊 Add vision system for object recognition
-
-🩺 Design extensions for healthcare applications
-
-👨‍💻 Author
-
-Adarsh Kumar
-🎓 BCA Student | 🤖 Robotics & AI Enthusiast
-
-🔗 GitHub: https://github.com/Adarshkumar61
+<p align="center" style="font-size:16px;">
+<b>Adarsh Kumar</b><br>
+🎓 BCA Student | 🤖 Robotics & AI Enthusiast<br>
+🔗 <a href="https://github.com/Adarshkumar61">GitHub Profile</a>
+</p>
