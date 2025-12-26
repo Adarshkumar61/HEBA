@@ -8,11 +8,9 @@
   <b>Hospital • Elderly • Bachelors Assistant Robot</b>
 </p>
 
-
-
-# 🤖 HEBA: Robotic Arm for Hospitals, Elderly & Bachelors
+<p align="center">
 ========================================================
-
+</p>
 _A modular, practical robotic arm system designed for healthcare, elderly assistance, and everyday automation using embedded control and mechanical integration._
 
 This repository contains the **HEBA robotic arm project**, including hardware connections, servo control, mission logic, diagrams, and instructions to build and control the robot.
