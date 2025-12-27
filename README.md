@@ -128,16 +128,16 @@ Ensure servos are calibrated before running
 
 <br>
 
-<h2 align="center" style="font-size:28px;">📸 Visual Demo</h2>
+<h2 align="center" style="font-size:28px;">📸 Visual Demo(if not visible go to demo folder)</h2>
 
 <p align="center">
-<img src="Pics/hardware_setup.jpg" width="65%">
+<img src="H_E_B_A/Demo/heba_hardware.png" width="65%">
 </p>
 
 <p align="center" style="font-size:16px;"><b>🧱 Hardware Setup</b></p>
 
 <p align="center">
-<img src="Pics/arm_motion.jpg" width="65%">
+<img src="H_E_B_A/Demo/heba_pic_in_running_pose.png" width="65%">
 </p>
 
 <p align="center" style="font-size:16px;"><b>🎯 Arm in Action</b></p>
@@ -180,84 +180,8 @@ Ensure servos are calibrated before running
 
 <h2 align="center" style="font-size:28px;">👨‍💻 Author</h2>
 
-<<<<<<< HEAD
-to execute predefined movement sequences.  
-Ensure power is connected and servos are properly calibrated before running.
-
----
-
-## 📸 Visual Demo
---------------------------------------------------
-
-
-
-```md
-### 🧱 Hardware Setup
-![Hardware Setup](H_E_B_A/Demo/heba_hardware.png)
-
-### 🎯 Arm in Action
-![Heba in Motion](H_E_B_A/Demo/heba_pic_in_running_pose.png)
-
-🧪 Expected Behavior
-
-✔ The robotic arm powers up
-✔ Servos move according to instructions
-✔ Missions run as sequences of motions
-✔ The system holds position and responds to commands
-
-📈 Mission & Logic
-
-Inside:
-
-Heba_Mission/
-
-
-You’ll find mission sequences like:
-
-Home position
-
-Pick position
-
-Place position
-
-Return to idle
-
-These define how HEBA should behave in specific use-cases.
-
-📚 Learning Outcomes
-
-By building and completing HEBA you will learn:
-
-🤖 Robotic arm kinematics and mechanics
-
-🔧 Servo control and embedded programming
-
-💡 Hardware wiring and circuit integration
-
-📐 Planning of motion sequences and tasks
-
-🚀 Future Enhancements
-
-🤖 Add sensor feedback (limit switches, encoders)
-
-📡 Integrate Bluetooth / Wi-Fi control
-
-📲 Control via mobile app
-
-📊 Add vision system for object recognition
-
-🩺 Design extensions for healthcare applications
-
-👨‍💻 Author
-
-Adarsh Kumar
-🎓 BCA Student | 🤖 Robotics & AI Enthusiast
-
-🔗 GitHub: https://github.com/Adarshkumar61
-=======
 <p align="center" style="font-size:16px;">
 <b>Adarsh Kumar</b><br>
 🎓 BCA Student | 🤖 Robotics & AI Enthusiast<br>
 🔗 <a href="https://github.com/Adarshkumar61">GitHub Profile</a>
 </p>
->>>>>>> 9883ed0491c8bfee5631ef44eae5613a4af14a06
