@@ -9,7 +9,7 @@ ESP32 GPIO22 (SCL) ────────> PCA9685 SCL
                        └───> RTC SCL
 
 🟥 SERVO CONNECTIONS
-Waist MG996R     → PCA CH0
+Waist MG996R     → PCA CH0 
 Shoulder MG996R  → PCA CH1
 Elbow MG996R     → PCA CH2
 WristRoll SG90   → PCA CH3
