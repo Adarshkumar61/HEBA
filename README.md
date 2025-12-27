@@ -140,10 +140,10 @@ Ensure power is connected and servos are properly calibrated before running.
 
 ```md
 ### 🧱 Hardware Setup
-![Hardware Setup](Pics/hardware_setup.jpg)
+![Hardware Setup](H_E_B_A/Demo/heba_hardware.png)
 
 ### 🎯 Arm in Action
-![Arm Motion](Pics/arm_motion.jpg)
+![Heba in Motion](H_E_B_A/Demo/heba_pic_in_running_pose.png)
 
 🧪 Expected Behavior
 
